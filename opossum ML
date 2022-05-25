@@ -1,0 +1,44 @@
+'''
+I'm going to be doing some basic ML today. Data is from Kaggle, the possum regression dataset. Just doing some exploration
+and then some regression and maybe some feature engineering.
+'''
+
+
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+
+df = pd.read_csv('C:/Users/samdk/Desktop/data science/MachineLearning/archive/possum.csv')
+
+#doing some exploration, head, shape, columnes, datatypes, null values
+df.head()
+df.shape
+df.columns
+df.dtypes
+df.isnull().sum()
+
+#drop un-needed columns from the df
+df = df.drop(['case', 'site', 'Pop', 'sex'], axis=1)
+
+#remeber the NAs we saw earlier? We need to drop them because skLearn cannot handle that, then checking for null values again.
+df = df.dropna()
+df.isnull().sum()
+
+#with Linear regression we have to decide what out target (y) variable and our factors (x) variables are
+#y is age, x's are everything else
+X = df.drop(['age'], axis=1)
+Y = df[['age']]
+model = LinearRegression().fit(X, Y)
+
+#creating a df with all model attributes/values
+data = {'Attributes':X.columns, 'Values':model.coef_[0]}
+regression_df = pd.DataFrame(data)
+
+#create new df with xint and append to create an overall then check the regression df
+xint_df = {'Attributes' : 'xint', 'Values': model.intercept_[0]}
+regression_df = regression_df.append(xint_df, ignore_index = True)
+regression_df
+
+#creating a column with predictions
+df['prediction']=(model.predict(X))
+df[['age', 'prediction']]
