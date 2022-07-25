@@ -1,0 +1,49 @@
+'''
+The purpose of this code is to automate my monthly budget roundup/recording. 
+The input is a csv with partially organized transactions, the output is a csv/excel doc with fully organized transactions.
+
+Steps:
+1 - import modules
+2 - import transactions
+3 - drop unused columns
+4 - reorganize categories
+5 - sort transactions by categories/date
+6 - export to excel doc
+'''
+
+
+# import modules
+import pandas as pd
+
+#import transactions
+df = pd.read_excel('filepath.csv')
+
+#grab relevant columns
+df = df[['Transaction Date', 'Description', 'Category', 'Amount']]
+
+#reorganize columns
+
+#change categories using a map function
+df['Category'] = df['Category'].map({'Shopping':'Entertainment', 'Bills & Utilities':'Utilities',\
+                                     'Health & Wellness':'Health', 'Groceries':'Groceries', 'Gas':'Gas',\
+                                    'Entertainment':'Entertainment', 'Home':'Home', 'Food & Drink':'Restaurant'})
+
+#create list, iterate over the list and change categories based on where transactions took place
+house = ['FLEET', 'DEPOT']
+for i in house:
+    df.loc[df.Description.str.contains(i), 'Category'] = 'House'
+    
+groceries = ['CUB', 'ALDI', 'COSTCO']
+for i in groceries:
+    df.loc[df.Description.str.contains(i), 'Category'] = 'Groceries'
+
+gas = ['HOLIDAY', 'COSTCO GAS']
+for i in gas:
+    df.loc[df.Description.str.contains(i), 'Category'] = 'Gas'
+    
+#sort transactions by category/date
+
+df.sort_values(by=['Category', 'Transaction Date'])
+
+#export to excel doc
+df.to_excel('file location')
