@@ -11,48 +11,26 @@ Steps:
 6 - export to excel doc
 '''
 
-
-# import modules
-import pandas as pd
-
-#import transactions
-df_c = pd.read_csv('filepath.csv')
+import pandas as pd                                                                                           #import modules
+df_c = pd.read_csv('filepath.csv')                                                                            #import transactions
 df_t = pd.read_csv('filepath.csv)
-
-#grab relevant columns
-df_c = df_c[['Transaction Date', 'Description', 'Category', 'Amount']]
+df_c = df_c[['Transaction Date', 'Description', 'Category', 'Amount']]                                        #grab relevant columns
 df_t = df_t[['Posting Date', 'Description', 'Transaction Category', 'Amount']]
-
-#rename t columns
-df_t.rename(columns = {'Posting Date':'Transaction Date', 'Transaction Category':'Category'}, inplace = True)
-
-#combine dfs
-df_final = pd.concat([df_c, df_t], axis=0)
-
-
-#reorganize columns
-
-#change categories using a map function
-df['Category'] = df['Category'].map({'Shopping':'Entertainment', 'Bills & Utilities':'Utilities',\
+df_t.rename(columns = {'Posting Date':'Transaction Date', 'Transaction Category':'Category'}, inplace = True) #rename df_t columns
+df = pd.concat([df_c, df_t], axis=0)                                                                           #combine dfs
+df['Category'] = df['Category'].map({'Shopping':'Entertainment', 'Bills & Utilities':'Utilities',\             #change categories using a map function
                                      'Health & Wellness':'Health', 'Groceries':'Groceries', 'Gas':'Gas',\
                                     'Entertainment':'Entertainment', 'Home':'Home', 'Food & Drink':'Restaurant'})
-
-#create list, iterate over the list and change categories based on where transactions took place
-house = ['FLEET', 'DEPOT']
+house = ['FLEET', 'DEPOT']                                                                                     #change categories based on where transactions took place
 for i in house:
-    df.loc[df.Description.str.contains(i), 'Category'] = 'House'
-    
+    df.loc[df.Description.str.contains(i), 'Category'] = 'House'   
 groceries = ['CUB', 'ALDI', 'COSTCO']
 for i in groceries:
     df.loc[df.Description.str.contains(i), 'Category'] = 'Groceries'
-
 gas = ['HOLIDAY', 'COSTCO GAS']
 for i in gas:
     df.loc[df.Description.str.contains(i), 'Category'] = 'Gas'
-    
-#sort transactions by category/date
-
-df.sort_values(by=['Category', 'Transaction Date'])
-
-#export to excel doc
-df.to_excel('file location')
+df.sort_values(by=['Category', 'Transaction Date'])                                                              #sort transactions by category/date
+df['Transaction Date'] = pd.to_datetime(df['Transaction Date'], format='%m/%d/%Y')                               #adjust date/time and sort for transaction date
+df = df.loc[(df['Transaction Date'] >= '2022-06-01') & (df['Transaction Date'] <= '2022-06-30')]
+df.to_csv('filepath', date_format='%Y/%m/%d')                                                                     #export to excel doc
