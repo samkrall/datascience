@@ -1,0 +1,118 @@
+#import/install packages
+import pandas as pd
+import numpy as np
+from matplotlib import pyplot as plt
+import seaborn as sns
+
+#load data
+df = pd.read_csv('C:/Users/samdk/Desktop/data science/data/diabetes.csv')
+
+'''
+Notes
+-From head/tail, data is loaded correctly
+-shape is 768x9
+-info - no missing values, every column is int/float, lots of zeros tho...
+-pregnancies could be recodesd
+-outcome is a binary, logistic regression or decision tree...
+'''
+df.dtypes
+
+df.describe()
+
+#correlation
+df.corr(method='pearson')
+
+#data skew
+df.skew()
+
+#histograms of all columns
+#note the "0" values for glucose, BP, skin thickness, insulin, BMI... shouldnt be there
+df.hist(figsize=(20, 10))
+
+#density plot of all columns
+df.plot(kind='density', figsize = (20, 10), subplots=True, layout=(3,3), sharex=False)
+
+#box/whisker of all columns
+df.plot(kind='box', figsize = (20, 10), subplots=True, layout=(3,3), sharex=False, sharey=False) 
+
+#data wrangling
+df.info()
+df.head()
+
+#track zeros, replace with medians for all continious columns
+column_list = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI', 'DiabetesPedigreeFunction','Age']
+for i in column_list:
+    df[i].replace(to_replace = 0,value = np.nan, inplace=True)
+    df[i].fillna(df[i].median(), inplace=True)
+    
+#preprocessing data
+X = df.iloc[:, 0:8]
+y = df.iloc[:, 8]
+
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+rescaledX = scaler.fit_transform(X) 
+
+#kfold cross validation
+from sklearn.model_selection import KFold
+from sklearn.model_selection import cross_val_score
+folds = 5
+kfold = KFold(n_splits = folds, random_state = 1, shuffle=True)
+
+#testing out some ml algos
+#create lists for relevant model metrics, this will be used to compare different models
+model = []
+model_mean = []
+model_std = []
+
+#logistic regression
+from sklearn.linear_model import  LogisticRegression 
+method = LogisticRegression(random_state=1) 
+results = cross_val_score(method, rescaledX, y, cv=kfold)
+
+#adding to end of list of model metrics
+model.append(method)
+model_mean.append(round(results.mean(), 4))
+model_std.append(round(results.std(), 4))
+
+#decision tree classifier
+from sklearn.tree import DecisionTreeClassifier
+method = DecisionTreeClassifier(random_state=1) 
+results = cross_val_score(method, rescaledX, y, cv=kfold)
+model.append(method)
+model_mean.append(round(results.mean(), 4))
+model_std.append(round(results.std(), 4))
+
+#random forest classifier
+from sklearn.ensemble import RandomForestClassifier
+method = RandomForestClassifier(random_state=1) 
+results = cross_val_score(method, X, y, cv=kfold)
+model.append(method)
+model_mean.append(round(results.mean(), 4))
+model_std.append(round(results.std(), 4))
+
+#gradient boosting classifier
+from sklearn.ensemble import GradientBoostingClassifier
+method = GradientBoostingClassifier(random_state=1) 
+results = cross_val_score(method, X, y, cv=kfold)
+model.append(method)
+model_mean.append(round(results.mean(), 4))
+model_std.append(round(results.std(), 4))
+
+#XG Boost Classifier
+import xgboost as xgb
+XGB = xgb.XGBClassifier
+method = XGB(random_state=1) 
+results = cross_val_score(method, X, y, cv=kfold)
+model.append(method)
+model_mean.append(round(results.mean(), 4))
+model_std.append(round(results.std(), 4))
+
+#create df of model results, logreg works best without any tuning, random forest and gradient boosting close behind
+models = pd.DataFrame({
+    'Model' : model,
+    'Score' : model_mean,
+    'std' : model_std
+})
+
+models.sort_values(by = 'Score', ascending = False)
