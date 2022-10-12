@@ -42,3 +42,8 @@ regression_df
 #creating a column with predictions
 df['prediction']=(model.predict(X))
 df[['age', 'prediction']]
+
+#score the model (w/ R2)
+print(model.score(X, y))
+
+#not a great score, but there's more to do!
