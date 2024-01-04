@@ -35,3 +35,44 @@ df.sort_values(by=['Category', 'Transaction Date'], inplace=True)               
 df['Transaction Date'] = pd.to_datetime(df['Transaction Date'], format='%m/%d/%Y')                               #adjust date/time and sort for transaction date
 df = df.loc[(df['Transaction Date'] >= '2022-06-01') & (df['Transaction Date'] <= '2022-06-30')]
 df.to_csv('filepath', date_format='%Y/%m/%d')                                                                     #export to excel doc
+
+
+
+df_t = pd.read_csv('path'.replace('\\', '/'))
+mortgage = '7618'
+paycheck = 'JUDE'
+utilities  = ['CHASKA', 'CPENERGY']
+fivetwonine = 'MN DIR ACH'
+fun = 'VENMO'
+tax = 'DEPT OF REVEN'
+
+df_t = df_t[['Posting Date', 'Amount', 'Description']]
+
+df_t.loc[df_t['Description'].str.contains('7618'), 'Category'] = 'Mortgage'
+df_t.loc[df_t['Description'].str.contains('JUDE'), 'Category'] = 'Paycheck'
+df_t.loc[df_t['Description'].str.contains('CHASKA'), 'Category'] = 'Bills & Utilities'
+df_t.loc[df_t['Description'].str.contains('CPENERGY'), 'Category'] = 'Bills & Utilities'
+df_t.loc[df_t['Description'].str.contains('MN DIR ACH'), 'Category'] = 'Savings'
+df_t.loc[df_t['Description'].str.contains('VENMO'), 'Category'] = 'Fun'
+df_t.loc[df_t['Description'].str.contains('DEPT OF REVEN'), 'Category'] = 'Tax'
+
+df_t.rename(columns = {'Posting Date':'Transaction Date'}, inplace = True) 
+df_t.dropna(inplace=True)
+df_t = df_t.reindex(columns=['Transaction Date', 'Description', 'Category', 'Amount'])
+
+df_c = pd.read_csv('C:\\Users\krallsx\OneDrive - Abbott/new1\chase.csv'.replace('\\', '/')) 
+df_c = df_c[['Transaction Date', 'Description', 'Category', 'Amount']]  
+
+df = pd.concat([df_c, df_t], axis=0)
+
+
+df_c = pd.read_csv('path'.replace('\\', '/')) 
+df_c = df_c[['Transaction Date', 'Description', 'Category', 'Amount']]  
+
+df = pd.concat([df_c, df_t], axis=0) 
+
+df['Transaction Date'] = pd.to_datetime(df['Transaction Date'])
+df['date'] = df['Transaction Date'].dt.strftime('%m/%Y')
+df.drop('Transaction Date', axis = 'columns', inplace=True)
+df_new = df.sort_values(by=['date', 'Category'])
+df_new.to_csv
